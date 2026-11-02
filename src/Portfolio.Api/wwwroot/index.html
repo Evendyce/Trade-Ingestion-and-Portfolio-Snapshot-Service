@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#123e37" />
+    <title>Ledger — Portfolio workspace</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Ledger home"
+        ><span class="brand-mark">L<span>↗</span></span
+        >ledger<span class="brand-dot">.</span></a
+      >
+      <div class="workspace-label">PORTFOLIO WORKSPACE</div>
+      <a class="nav-item active" href="/" aria-current="page"
+        ><span aria-hidden="true">▦</span> Portfolio overview
+        <span class="nav-arrow">↗</span></a
+      >
+      <a class="nav-item" href="/swagger"
+        ><span aria-hidden="true">⌘</span> API explorer
+        <span class="nav-arrow">↗</span></a
+      >
+      <div class="sidebar-note">
+        <span class="small-orbit" aria-hidden="true">◎</span>
+        <h3>Every trade has a story.</h3>
+        <p>
+          Follow each version, from the first submission to the latest
+          correction.
+        </p>
+        <span class="note-rule"></span
+        ><span class="note-caption">A clearer view of your portfolio.</span>
+      </div>
+      <div class="sidebar-footer">
+        <span class="avatar">LD</span>
+        <div>
+          <strong>Local development</strong
+          ><span>USD · Portfolio data service</span>
+        </div>
+        <span class="online-dot" aria-hidden="true"></span>
+      </div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar">
+        <span
+          ><span class="breadcrumb">Workspace</span
+          ><span class="slash">/</span> Portfolio overview</span
+        ><a href="/swagger"
+          >Explore the API <span aria-hidden="true">↗</span></a
+        >
+      </header>
+      <main>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">YOUR INVESTMENTS, IN FOCUS</div>
+            <h1>Portfolio overview<span>.</span></h1>
+            <p>
+              A daily view of your holdings, with every correction accounted
+              for.
+            </p>
+          </div>
+          <button id="new-trade" class="button primary">
+            <span aria-hidden="true">＋</span> Submit trade
+          </button>
+        </div>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <section class="filters" aria-label="Snapshot filters">
+          <div class="filter-title">
+            <span class="filter-icon" aria-hidden="true">⌕</span>
+            <div>
+              <strong>Choose your perspective</strong
+              ><span>Latest corrections, or a moment in time.</span>
+            </div>
+          </div>
+          <form id="snapshot-form">
+            <label
+              >Account<input
+                id="account"
+                name="account"
+                value="ACC-DEMO"
+                required
+                maxlength="64"
+                pattern="[A-Za-z0-9_.:\-]+" /></label
+            ><label
+              >Valuation date<input
+                id="valuation-date"
+                type="date"
+                value="2025-03-01"
+                min="1900-01-01"
+                required /></label
+            ><label class="cutoff-label"
+              >Version cutoff <span>(optional, UTC)</span
+              ><input
+                id="cutoff"
+                type="datetime-local"
+                step="1"
+                aria-describedby="cutoff-help" /></label
+            ><button class="button secondary" type="submit">
+              View snapshot <span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <span id="cutoff-help" class="sr-only"
+            >Leave blank for the latest accepted upstream versions. The cutoff
+            uses UTC.</span
+          >
+        </section>
+        <div class="snapshot-heading">
+          <span id="snapshot-caption">Loading portfolio…</span
+          ><span class="version-pill" id="version-mode"
+            ><span aria-hidden="true">●</span> Latest corrected view</span
+          >
+        </div>
+        <section class="metrics" aria-label="Portfolio totals">
+          <article class="metric featured">
+            <div class="metric-label">
+              Total market value <span aria-hidden="true">↗</span>
+            </div>
+            <div class="metric-value" id="total-value">—</div>
+            <div class="metric-foot">
+              <span class="currency-chip">USD</span> Investment holdings
+            </div>
+            <div class="metric-decoration" aria-hidden="true">◔</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">
+              Unrealized return <span aria-hidden="true">↗</span>
+            </div>
+            <div class="metric-value" id="total-pnl">—</div>
+            <div class="metric-foot" id="return-percent">
+              Market value less remaining cost
+            </div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">
+              Remaining cost basis <span aria-hidden="true">≋</span>
+            </div>
+            <div class="metric-value" id="total-cost">—</div>
+            <div class="metric-foot">Moving weighted average</div>
+          </article>
+          <article class="metric compact">
+            <div class="metric-label">
+              Open positions <span aria-hidden="true">▥</span>
+            </div>
+            <div class="metric-value" id="position-count">—</div>
+            <div class="metric-foot">Across registered instruments</div>
+          </article>
+        </section>
+        <section class="data-panel">
+          <div class="panel-top">
+            <div class="tabs" role="tablist" aria-label="Portfolio data">
+              <button
+                id="tab-positions"
+                class="tab selected"
+                role="tab"
+                aria-selected="true"
+                aria-controls="data-content"
+                data-tab="positions"
+              >
+                Holdings
+                <span id="holdings-count" class="count">0</span></button
+              ><button
+                id="tab-trades"
+                class="tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="data-content"
+                tabindex="-1"
+                data-tab="trades"
+              >
+                Trade ledger</button
+              ><button
+                id="tab-events"
+                class="tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="data-content"
+                tabindex="-1"
+                data-tab="events"
+              >
+                Ingestion activity
+              </button>
+            </div>
+            <span class="panel-meta" id="panel-meta">VALUED IN USD</span>
+          </div>
+          <div
+            id="data-content"
+            role="tabpanel"
+            aria-labelledby="tab-positions"
+            tabindex="0"
+            aria-live="polite"
+          ></div>
+          <div class="panel-bottom">
+            <span
+              ><span class="legend-dot" aria-hidden="true"></span
+              ><span id="panel-description"
+                >Prices use the latest available date on or before
+                valuation.</span
+              ></span
+            ><span id="updated-at">—</span>
+          </div>
+        </section>
+        <section class="bottom-grid">
+          <article class="explainer">
+            <div class="eyebrow">BUILT FOR TRACEABILITY</div>
+            <h2>One trade. A complete history.</h2>
+            <p>
+              Resent trades leave your totals unchanged. Later corrections
+              create a new version, so you can always look back.
+            </p>
+            <div class="flow">
+              <span><i>01</i> Submit</span><b aria-hidden="true">→</b
+              ><span><i>02</i> Verify version</span><b aria-hidden="true">→</b
+              ><span><i>03</i> Revalue</span>
+            </div>
+          </article>
+          <article class="demo-card">
+            <span class="demo-tag">TRY IT YOURSELF</span>
+            <h2>See a correction in action.</h2>
+            <p>
+              Load a fresh example with a buy, a resend, and a correction. Watch
+              the audit trail tell the story.
+            </p>
+            <button id="run-demo" class="button secondary">
+              Load example portfolio <span aria-hidden="true">↗</span>
+            </button>
+          </article>
+        </section>
+        <footer class="page-footer">
+          <span>LEDGER / PORTFOLIO DATA SERVICE</span
+          ><span id="service-status">Checking service…</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="trade-dialog" aria-labelledby="trade-title">
+      <form id="trade-form">
+        <div class="dialog-heading">
+          <div>
+            <div class="eyebrow">TRADE INGESTION</div>
+            <h2 id="trade-title">Submit a trade</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            id="close-trade"
+            aria-label="Close trade form"
+          >
+            ×
+          </button>
+        </div>
+        <p class="dialog-intro">
+          Use the same external reference and a later version timestamp to
+          correct a trade.
+        </p>
+        <div id="trade-error" class="notice error" role="alert" hidden></div>
+        <label
+          >External reference<input
+            name="externalRef"
+            id="trade-ref"
+            required
+            maxlength="80"
+            pattern="[A-Za-z0-9_.:\-]+"
+        /></label>
+        <label
+          >Account<input
+            name="accountId"
+            id="trade-account"
+            required
+            maxlength="64"
+            pattern="[A-Za-z0-9_.:\-]+"
+        /></label>
+        <div class="form-row">
+          <label
+            >Instrument<select
+              name="instrumentId"
+              id="trade-instrument"
+              required
+            ></select></label
+          ><label
+            >Side<select name="side">
+              <option>BUY</option>
+              <option>SELL</option>
+            </select></label
+          >
+        </div>
+        <div class="form-row">
+          <label
+            >Quantity<input
+              name="quantity"
+              type="number"
+              min="0.000001"
+              max="1000000000"
+              step="0.000001"
+              value="10"
+              required /></label
+          ><label
+            >Trade price (USD)<input
+              name="price"
+              type="number"
+              min="0.000001"
+              max="1000000000"
+              step="0.000001"
+              value="185.40"
+              required
+          /></label>
+        </div>
+        <label
+          >Trade date<input
+            name="tradeDate"
+            id="trade-date"
+            type="date"
+            min="1900-01-01"
+            required
+        /></label>
+        <label
+          >Version timestamp (UTC)<input
+            name="asOf"
+            id="trade-asof"
+            type="datetime-local"
+            step="1"
+            required
+        /></label>
+        <div class="form-note">
+          Account, instrument and side stay fixed for an existing reference.
+          Quantity, price and trade date can be corrected. Short positions are
+          rejected.
+        </div>
+        <button
+          class="button primary full-width"
+          type="submit"
+          id="submit-trade"
+        >
+          Submit trade <span aria-hidden="true">→</span>
+        </button>
+      </form>
+    </dialog>
+    <dialog id="revision-dialog" aria-labelledby="revision-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">ACCEPTED VERSIONS</div>
+          <h2 id="revision-title">Trade history</h2>
+        </div>
+        <button
+          class="icon-button"
+          id="close-revisions"
+          aria-label="Close revision history"
+        >
+          ×
+        </button>
+      </div>
+      <div id="revision-content"></div>
+    </dialog>
+  </body>
+</html>
