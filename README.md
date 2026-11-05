@@ -279,5 +279,3 @@ FX and cash are deferred optional scope. There is no separate frontend framework
 | Record a 5–10 minute narrated application/architecture demo. | ☐ |
 
 See [SOLUTION.md](SOLUTION.md) for business policies, temporal semantics, precision, concurrency, performance considerations, and .NET Framework integration.
-
-For a suggested application and source walkthrough, see [Demo outline](docs/DEMO.md).
